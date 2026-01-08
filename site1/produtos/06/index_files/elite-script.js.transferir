@@ -1,0 +1,47 @@
+let REVIEWS = [
+  {name:"José Silva", stars:5, comment:"Produto top, realista e robusto!", photo:"provasSociais/img1.jpg"},
+  {name:"Maria Souza", stars:5, comment:"Chegou rápido e bem embalado.", photo:"provasSociais/img2.jpg"},
+  {name:"Rafael Costa", stars:4, comment:"Atende o que promete.", photo:""},
+  {name:"Camila Ribeiro", stars:5, comment:"A experiência com blowback é absurda!", photo:"provasSociais/img3.jpg"},
+  {name:"Juliana Alves", stars:4, comment:"Ótimo custo-benefício.", photo:"provasSociais/img4.jpg"},
+  {name:"Thiago Dias", stars:5, comment:"Muito realista para treino.", photo:""},
+  {name:"Patrícia Lima", stars:5, comment:"Acabamento impecável.", photo:"provasSociais/img5.jpg"},
+  {name:"André Nunes", stars:4, comment:"Recomendo.", photo:""},
+  {name:"Larissa Rocha", stars:5, comment:"Superou expectativas!", photo:"provasSociais/img6.jpg"},
+  {name:"Diego Martins", stars:5, comment:"Compra sem erro.", photo:""},
+  {name:"Isabela Santos", stars:4, comment:"Excelente qualidade.", photo:"provasSociais/img7.jpg"},
+  {name:"Bruno Pereira", stars:5, comment:"Voltaria a comprar.", photo:"provasSociais/img8.jpg"},
+];
+
+function starStr(n){ return '★'.repeat(n)+'☆'.repeat(5-n); }
+
+const container=document.getElementById('elite-container');
+function renderReviews(){
+  container.innerHTML='';
+  REVIEWS.forEach(r=>{
+    const card=document.createElement('div'); card.className='elite-card';
+    if(r.photo){ const img=document.createElement('img'); img.src=r.photo; img.alt=`Foto de ${r.name}`; card.appendChild(img); }
+    const name=document.createElement('div'); name.className='elite-name'; name.textContent=r.name;
+    const stars=document.createElement('div'); stars.className='elite-stars'; stars.textContent=starStr(r.stars);
+    const comment=document.createElement('div'); comment.className='elite-comment'; comment.textContent=r.comment;
+    card.append(name,stars,comment); container.appendChild(card);
+  });
+}
+renderReviews();
+
+const form=document.getElementById('review-form');
+if(form){
+  form.addEventListener('submit',e=>{
+    e.preventDefault();
+    const name=document.getElementById('rev-name').value.trim();
+    const stars=+document.getElementById('rev-stars').value;
+    const comment=document.getElementById('rev-comment').value.trim();
+    const file=document.getElementById('rev-photo').files[0];
+    const photo=file?URL.createObjectURL(file):"";
+    if(!name||!comment) return;
+    REVIEWS.unshift({name,stars,comment,photo});
+    renderReviews();
+    form.reset();
+    container.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+}

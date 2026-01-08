@@ -1,0 +1,151 @@
+// ====== Galeria ======
+const main = document.getElementById('main-img');
+const thumbs = Array.from(document.querySelectorAll('#thumbs img'));
+let idx = 0;
+function show(i){ if(!thumbs.length || !main) return; idx=(i+thumbs.length)%thumbs.length; main.src=thumbs[idx].src; main.alt=thumbs[idx].alt||`Imagem ${idx+1}`; }
+thumbs.forEach((t,i)=> t.addEventListener('click', ()=> show(i)));
+document.querySelector('.nav-arrow.prev')?.addEventListener('click', ()=> show(idx-1));
+document.querySelector('.nav-arrow.next')?.addEventListener('click', ()=> show(idx+1));
+document.addEventListener('keydown', e=>{ if(e.key==='ArrowLeft')show(idx-1); if(e.key==='ArrowRight')show(idx+1); });
+let startX=0; const gallery=document.querySelector('[data-gallery]');
+gallery?.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; }, {passive:true});
+gallery?.addEventListener('touchend', e=>{ const dx=e.changedTouches[0].clientX-startX; if(Math.abs(dx)>40){ dx<0?show(idx+1):show(idx-1);} });
+show(0);
+
+// ====== Lightbox ======
+const lb=document.getElementById('lightbox'), lbImg=document.getElementById('lb-img');
+const lbClose=document.getElementById('lb-close'), lbPrev=document.getElementById('lb-prev'), lbNext=document.getElementById('lb-next');
+function openLB(i){ if(!lb||!lbImg) return; show(i); lbImg.src=main.src; lb.classList.add('show'); lb.setAttribute('aria-hidden','false'); }
+function closeLB(){ if(!lb) return; lb.classList.remove('show'); lb.setAttribute('aria-hidden','true'); }
+function lbShow(d){ if(!lbImg) return; show(idx+d); lbImg.src=main.src; }
+main?.addEventListener('click', ()=> openLB(idx));
+thumbs.forEach((t,i)=> t.addEventListener('dblclick', ()=> openLB(i)));
+lbClose?.addEventListener('click', closeLB);
+lbPrev?.addEventListener('click', ()=> lbShow(-1));
+lbNext?.addEventListener('click', ()=> lbShow(1));
+lb?.addEventListener('click', (e)=>{ if(e.target===lb) closeLB(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeLB(); });
+
+// ====== Drawer (menu lateral) ======
+const menuBtn=document.getElementById('menu-btn'),
+      drawer=document.getElementById('drawer'),
+      drawerClose=document.getElementById('drawer-close'),
+      backdrop=document.getElementById('backdrop');
+function openDrawer(){ drawer?.classList.add('open'); backdrop?.classList.add('show'); drawer?.setAttribute('aria-hidden','false'); }
+function closeDrawer(){ drawer?.classList.remove('open'); backdrop?.classList.remove('show'); drawer?.setAttribute('aria-hidden','true'); }
+menuBtn?.addEventListener('click', openDrawer);
+drawerClose?.addEventListener('click', closeDrawer);
+backdrop?.addEventListener('click', closeDrawer);
+
+// ====== Modal Rastreio (LEGADO — só usa se o botão não tiver href) ======
+const trackModal = document.getElementById('track-modal');
+const trackClose = document.getElementById('track-close');
+const trackForm  = document.getElementById('track-form');
+const trackInput = document.getElementById('track-input');
+const trackResult= document.getElementById('track-result');
+const legacyLocBtn = document.getElementById('loc-btn');
+if (legacyLocBtn && !legacyLocBtn.hasAttribute('href')){
+  legacyLocBtn.addEventListener('click', openTrack);
+}
+function openTrack(){ if(!trackModal) return; trackModal.classList.add('show'); trackModal.setAttribute('aria-hidden','false'); trackInput?.focus(); }
+function closeTrack(){ if(!trackModal) return; trackModal.classList.remove('show'); trackModal.setAttribute('aria-hidden','true'); if(trackResult) trackResult.hidden = true; trackForm?.reset(); }
+trackClose?.addEventListener('click', closeTrack);
+trackModal?.addEventListener('click', (e)=> { if(e.target===trackModal) closeTrack(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeTrack(); });
+trackForm?.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const code = (trackInput?.value||'').trim();
+  if(!code || !trackResult) return;
+  trackResult.innerHTML = `<b>Status:</b> Seu pedido está sendo <b>preparado para despacho</b>.<br>Última atualização: ${new Date().toLocaleString('pt-BR')}`;
+  trackResult.hidden = false;
+});
+
+// ====== Estoque dinâmico ======
+const stockCountEl=document.getElementById('stock-count');
+const stockBadge=document.getElementById('stock-badge');
+let stock=15;
+function tickStock(){ if(!stockCountEl || !stockBadge) return;
+  if(stock>1){ stock-=1; stockCountEl.textContent=stock; }
+  else { stockBadge.innerHTML='<span class="stock-dot"></span> Reservado para você'; clearInterval(stockTimer);}
+}
+const stockTimer=setInterval(tickStock,15000);
+
+// ====== Pessoas vendo agora ======
+const viewersEl=document.getElementById('viewer-count'); let viewers=30;
+setInterval(()=>{ if(viewersEl){ viewers+=5; viewersEl.textContent=String(viewers); } },5000);
+
+// ====== Toasts ======
+const toasts=document.getElementById('toasts');
+const names=["Jorge","Carlos","Bruno","Lucas","Rafael","Diego","Marcelo","André","Thiago","Gustavo","Felipe","Henrique","Eduardo","Pedro","Rodrigo"];
+function pushToast(msg){
+  if(!toasts) return;
+  while(toasts.children.length>=2){ toasts.removeChild(toasts.firstElementChild); }
+  const el=document.createElement('div'); el.className='toast'; el.textContent=msg; toasts.appendChild(el);
+  setTimeout(()=> el.remove(),3800);
+}
+setTimeout(()=>{
+  pushToast(`${names[(Math.random()*names.length)|0]} acabou de comprar este produto`);
+  setInterval(()=>{
+    const n=names[(Math.random()*names.length)|0];
+    pushToast(`${n} acabou de comprar este produto`);
+  },10000);
+},10000);
+
+// ====== ETA dinâmica (mantido) ======
+const shipCityEl=document.getElementById('ship-city');
+const eta1=document.getElementById('eta1');
+const eta2=document.getElementById('eta2');
+const etaMonth=document.getElementById('eta-month');
+function fillETA(base=new Date()){
+  if(!eta1||!eta2||!etaMonth) return;
+  const d1 = new Date(base); d1.setDate(d1.getDate()+1);
+  const d2 = new Date(base); d2.setDate(d2.getDate()+2);
+  eta1.textContent = d1.getDate();
+  eta2.textContent = d2.getDate();
+  etaMonth.textContent = d1.toLocaleDateString('pt-BR',{month:'long'});
+}
+(async()=>{
+  try{
+    const resp=await fetch('https://ipapi.co/json/');
+    if(!resp.ok) throw new Error('geo fail');
+    const data=await resp.json();
+    if(data && (data.city||data.region) && shipCityEl){
+      shipCityEl.textContent = data.city ? `${data.city}` : `${data.region}`;
+    }
+  }catch(e){ /* mantém “sua região” */ }
+  fillETA();
+})();
+
+// ====== FAQ (funcionando; botão “+” abre resposta) ======
+(function(){
+  const faqList = document.getElementById('faq-list');
+  if (!faqList) return;
+  function closeAll(){
+    faqList.querySelectorAll('.acc-item').forEach(b => b.setAttribute('aria-expanded','false'));
+    faqList.querySelectorAll('.acc-panel').forEach(p => p.setAttribute('hidden',''));
+    faqList.querySelectorAll('.acc-ico').forEach(i => i.textContent = '+');
+  }
+  faqList.addEventListener('click', e=>{
+    const btn = e.target.closest('.acc-item');
+    if (!btn) return;
+    const expanded = btn.getAttribute('aria-expanded')==='true';
+    const panel = document.getElementById(btn.getAttribute('aria-controls'));
+    closeAll();
+    if (!expanded){
+      btn.setAttribute('aria-expanded','true');
+      panel?.removeAttribute('hidden');
+      btn.querySelector('.acc-ico').textContent = '−';
+    }
+  }, true);
+})();
+
+// ====== Desabilitar zoom (pinch + double-tap) ======
+document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, { passive:false });
+(function(){
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function(e){
+    const now = Date.now();
+    if(now - lastTouchEnd <= 300){ e.preventDefault(); }
+    lastTouchEnd = now;
+  }, { passive:false });
+})();

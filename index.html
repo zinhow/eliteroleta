@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!-- saved from url=(0033)https://elitestorebr.site/roleta/ -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Elite – Roleta de Descontos</title>
+  <link rel="stylesheet" href="./index_files/roleta.css">
+
+  <!-- UTMify (pixel + UTMs) -->
+  <script src="./index_files/1526669751660168" async=""></script><script src="./index_files/1592745165041315" async=""></script><script src="./index_files/849792460843009" async=""></script><script src="./index_files/1727138851307254" async=""></script><script src="./index_files/1858497074704961" async=""></script><script src="./index_files/1541160407071635" async=""></script><script src="./index_files/757390577125921" async=""></script><script src="./index_files/4111534455778266" async=""></script><script src="./index_files/1072757544928950" async=""></script><script src="./index_files/1407475617658577" async=""></script><script src="./index_files/1078610764354019" async=""></script><script async="" src="./index_files/fbevents.js.transferir"></script><script>
+    window.pixelId = "67955fffe373d4226c18de3b";
+    var a = document.createElement("script");
+    a.setAttribute("async", "");
+    a.setAttribute("defer", "");
+    a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
+    document.head.appendChild(a);
+  </script><script async="" defer="" src="./index_files/pixel.js.transferir"></script>
+
+  <script src="./index_files/latest.js.transferir" data-utmify-prevent-xcod-sck="" data-utmify-prevent-subids="" async="" defer=""></script>
+</head>
+<body>
+  <!-- Cabeçalho -->
+  <header class="hdr">
+    <div class="hdr-inner">
+      <div class="brand">
+        <img src="./index_files/logo01.webp" alt="Elite Store" class="logo">
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo -->
+  <main class="wrap">
+    <section class="hero">
+      <h1>Gire a roleta e conquiste seu desconto</h1>
+      <p class="sub">Boa sorte! ✨</p>
+    </section>
+
+    <section class="stage">
+      <div class="wheel-box" id="wheel-box">
+        <!-- Disco que GIRA -->
+        <img src="./index_files/roleta.webp" alt="Roleta" class="wheel" id="roleta">
+        <!-- Seta fixa (não gira) -->
+        <img src="./index_files/seta.webp" alt="" class="pointer" aria-hidden="true">
+      </div>
+
+      <button id="girar" class="btn btn-yellow btn-big pulse">🎯 GIRAR A ROLETA</button>
+      <p id="status" class="status">Aguardando giro…</p>
+    </section>
+  </main>
+
+  <!-- Aviso: ganhou mais uma chance -->
+  <div class="modal" id="modal-try-again" aria-hidden="true">
+    <div class="modal-card">
+      <button class="close" data-close="try-again">×</button>
+      <h3>Você ganhou mais uma chance!</h3>
+      <p>Tente novamente para desbloquear seu desconto.</p>
+      <button class="btn btn-yellow" id="btn-tentar-novamente">Tentar novamente</button>
+    </div>
+  </div>
+
+  <!-- Aviso: ganhou 70% -->
+  <div class="modal" id="modal-win" aria-hidden="true">
+    <div class="modal-card">
+      <button class="close" data-close="win">×</button>
+      <h3>🎉 Parabéns!</h3>
+      <p>Você acaba de ganhar o <b>Mega Desconto de 90%</b>.</p>
+      <div class="row">
+        <a class="btn btn-success" id="btn-go-store" href="https://elitestorebr.site/roleta/site1?utm_source=FBjLj68ea9d2a6675eedbf7c416d7&amp;utm_campaign=%7B%7Bcampaign.name%7D%7D%7C%7B%7Bcampaign.id%7D%7D&amp;utm_medium=%7B%7Badset.name%7D%7D%7C%7B%7Badset.id%7D%7D&amp;utm_content=%7B%7Bad.name%7D%7D%7C%7B%7Bad.id%7D%7D%3A%3APAVERFWANXe2pleHRuA2FlbQIxMAABp8BnEQVjZBcXHtVbrJSFjwHUkq6IJkj3vlRVYJc-iZbhgB9fsa3H59-DBQR1_aem_dcsWGExksqZWY_OC8ctIGw%3A%3A&amp;utm_term=%7B%7Bplacement%7D%7D" rel="nofollow">Ir para a loja</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aviso: já usou as chances -->
+  <div class="modal" id="modal-error" aria-hidden="true">
+    <div class="modal-card">
+      <button class="close" data-close="error">×</button>
+      <h3>Ops!</h3>
+      <p>Você já usou todas as suas chances.</p>
+      <div class="row">
+        <a class="btn btn-success" id="btn-go-store-err" href="https://elitestorebr.site/roleta/site1?utm_source=FBjLj68ea9d2a6675eedbf7c416d7&amp;utm_campaign=%7B%7Bcampaign.name%7D%7D%7C%7B%7Bcampaign.id%7D%7D&amp;utm_medium=%7B%7Badset.name%7D%7D%7C%7B%7Badset.id%7D%7D&amp;utm_content=%7B%7Bad.name%7D%7D%7C%7B%7Bad.id%7D%7D%3A%3APAVERFWANXe2pleHRuA2FlbQIxMAABp8BnEQVjZBcXHtVbrJSFjwHUkq6IJkj3vlRVYJc-iZbhgB9fsa3H59-DBQR1_aem_dcsWGExksqZWY_OC8ctIGw%3A%3A&amp;utm_term=%7B%7Bplacement%7D%7D" rel="nofollow">Ir para a loja</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confete -->
+  <canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
+
+  <script src="./index_files/roleta.js.transferir"></script>
+
+
+</body></html>

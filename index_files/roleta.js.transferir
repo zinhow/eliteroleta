@@ -1,0 +1,133 @@
+// ====== Config ======
+const ANG_TRY_AGAIN = 90; // 1ª parada → “Tente Outra Vez”
+const ANG_70        = 50; // 2ª parada → “70%”
+const URL_LOJA      = "site1"; // <-- envia para a página chamada "site1" (ajuste se precisar)
+
+// ====== Estado ======
+let girando = false;
+let tentativa = 0;        // 0 = primeira, 1 = segunda; >=2 → bloqueia
+let totalRot = 0;         // acumulador de rotação (evita qualquer “volta para trás”)
+
+// ====== DOM ======
+const roleta    = document.getElementById('roleta');
+const wheelBox  = document.getElementById('wheel-box');
+const btnGirar  = document.getElementById('girar');
+const statusEl  = document.getElementById('status');
+
+const modalTryAgain = document.getElementById('modal-try-again');
+const modalWin      = document.getElementById('modal-win');
+const modalError    = document.getElementById('modal-error');
+
+const btnTryAgain   = document.getElementById('btn-tentar-novamente');
+const btnGoStore    = document.getElementById('btn-go-store');
+const btnGoStoreErr = document.getElementById('btn-go-store-err');
+
+if (btnGoStore)    btnGoStore.href    = URL_LOJA;
+if (btnGoStoreErr) btnGoStoreErr.href = URL_LOJA;
+
+// Fechar modais (X)
+document.querySelectorAll('.close').forEach(btn=>{
+  btn.addEventListener('click', (e)=>{
+    const target = e.currentTarget.getAttribute('data-close');
+    if(target==='try-again') modalTryAgain.classList.remove('show');
+    if(target==='win')       modalWin.classList.remove('show');
+    if(target==='error')     modalError.classList.remove('show');
+  });
+});
+
+// ====== Confete ======
+function launchConfetti(amount=160){
+  const cvs = document.getElementById('confetti');
+  const ctx = cvs.getContext('2d');
+  const DPR = window.devicePixelRatio||1;
+  function resize(){
+    cvs.width  = innerWidth * DPR;
+    cvs.height = innerHeight * DPR;
+    cvs.style.width = innerWidth + 'px';
+    cvs.style.height= innerHeight + 'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  resize();
+  cvs.style.display='block';
+
+  const colors=['#ff4d4f','#ffd666','#69c0ff','#95de64','#b37feb','#ff85c0'];
+  const parts=[];
+  for(let i=0;i<amount;i++){
+    parts.push({
+      x:Math.random()*innerWidth, y:-20 - Math.random()*innerHeight*0.3,
+      r:4+Math.random()*6, c:colors[(Math.random()*colors.length)|0],
+      vx:-2+Math.random()*4, vy:3+Math.random()*3,
+      rot:Math.random()*Math.PI, vr:(Math.random()*0.2)-0.1
+    });
+  }
+  const start=performance.now(), maxT=2400;
+  (function anim(now){
+    const t=now-start;
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    parts.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.vy+=0.06; p.rot+=p.vr;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillStyle=p.c; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r);
+      ctx.restore();
+    });
+    if(t<maxT){ requestAnimationFrame(anim); }
+    else { cvs.style.display='none'; }
+  })(start);
+}
+
+// ====== Helpers modais ======
+function openTryAgain(){ modalTryAgain.classList.add('show'); }
+function openWin(){ modalWin.classList.add('show'); }
+function openError(){ modalError.classList.add('show'); }
+
+// ====== Giro ======
+function girarRoleta(){
+  if(girando) return;
+
+  // Se já usou as duas tentativas, bloqueia e mostra erro
+  if(tentativa >= 2){
+    openError();
+    return;
+  }
+
+  girando = true;
+  btnGirar.disabled = true;
+  statusEl.textContent = 'Girando…';
+
+  // duração ~5s (suave, com desaceleração)
+  roleta.style.setProperty('--spin-dur', '5s');
+
+  // Rotação sempre crescente (evita voltar)
+  const voltas = 6;
+  const alvo   = (tentativa === 0) ? ANG_TRY_AGAIN : ANG_70;
+  totalRot += (360 * voltas) + alvo;
+
+  requestAnimationFrame(()=>{ roleta.style.transform = `rotate(${totalRot}deg)`; });
+
+  // Fim da animação (~5s)
+  setTimeout(()=>{
+    girando = false;
+
+    if(tentativa === 0){
+      statusEl.textContent = 'Resultado: TENTE OUTRA VEZ';
+      openTryAgain();
+      tentativa = 1;                 // prepara 2ª tentativa
+      btnGirar.disabled = false;     // usuário fecha aviso e clica de novo
+    } else {
+      statusEl.textContent = 'Resultado: 70% DE DESCONTO';
+      wheelBox.classList.add('happy-glow'); // efeito alegria
+      launchConfetti(200);
+      openWin();
+      btnGirar.disabled = false;     // se tentar de novo, vai cair no erro
+      tentativa = 2;                 // marca que já usou tudo
+    }
+  }, 5050);
+}
+
+// Botão principal
+btnGirar.addEventListener('click', girarRoleta);
+
+// “Tentar novamente”: fecha modal e usuário clica no botão amarelo
+btnTryAgain.addEventListener('click', ()=>{
+  modalTryAgain.classList.remove('show');
+});

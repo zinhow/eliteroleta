@@ -1,0 +1,304 @@
+document.addEventListener('DOMContentLoaded', () => {
+  /* ============== MENU ============== */
+  const sideMenu = document.getElementById('sideMenu');
+  const menuBtn = document.getElementById('menuBtn');
+  const closeBtn = sideMenu.querySelector('.menu-close');
+  const menuInicioBtn = sideMenu.querySelector('.menu-inicio');
+  const backdrop = document.getElementById('backdrop');
+
+  function openMenu(){ sideMenu.classList.add('open'); backdrop.hidden=false; sideMenu.setAttribute('aria-hidden','false'); closeBtn.focus(); }
+  function closeMenu(){ sideMenu.classList.remove('open'); backdrop.hidden=true; sideMenu.setAttribute('aria-hidden','true'); }
+
+  menuBtn.addEventListener('click', openMenu, {passive:true});
+  closeBtn.addEventListener('click', closeMenu, {passive:true});
+  backdrop.addEventListener('click', closeMenu, {passive:true});
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeMenu(); });
+  menuInicioBtn.addEventListener('click', closeMenu, {passive:true});
+
+  /* ============== BUSCA ============== */
+  const searchBtn = document.getElementById('searchBtn');
+  const searchBar = document.getElementById('searchBar');
+  const q = document.getElementById('q');
+  const qBtn = document.getElementById('qBtn');
+
+  function toggleSearch(){
+    const isHidden = searchBar.hasAttribute('hidden');
+    if (isHidden){ searchBar.removeAttribute('hidden'); q.focus(); }
+    else { searchBar.setAttribute('hidden',''); }
+  }
+  function doSearch(){
+    const term = (q.value||'').trim().toLowerCase();
+    if (!term) return;
+    if (term.includes('pistola')) window.location.href = 'colecao/pistola';
+    else if (term.includes('revolver') || term.includes('revólver')) window.location.href = 'colecao/revolver';
+    else window.location.href = 'colecao/todos';
+  }
+  searchBtn.addEventListener('click', toggleSearch, {passive:true});
+  qBtn.addEventListener('click', doSearch, {passive:true});
+  q.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+
+  /* ============== ESCASSEZ ============== */
+  const ateHoraEl = document.getElementById('ate-hora');
+  const countdownEl = document.getElementById('countdown');
+  let endTime=null;
+
+  function setNewEndTime(){
+    const now = new Date();
+    endTime = new Date(now.getTime() + 10*60*1000);
+    const hh = String(endTime.getHours()).padStart(2,'0');
+    const mm = String(endTime.getMinutes()).padStart(2,'0');
+    ateHoraEl.textContent = `${hh}:${mm}`;
+  }
+  function tickCountdown(){
+    const diff = endTime - new Date();
+    if (diff<=0){ setNewEndTime(); return; }
+    const sTot = Math.floor(diff/1000);
+    const m = String(Math.floor(sTot/60)).padStart(2,'0');
+    const s = String(sTot%60).padStart(2,'0');
+    countdownEl.textContent = `${m}:${s}`;
+  }
+  setNewEndTime(); tickCountdown();
+  setInterval(tickCountdown, 1000);
+
+  /* ============== DADOS ============== */
+  const data = JSON.parse(document.getElementById('produtos-data').textContent);
+  const produtosArr = data.produtos;
+  const byId = Object.fromEntries(produtosArr.map(p => [p.id, p]));
+  const colecoesArr = data.colecoes || [];
+
+  /* ============== ESTOQUE VIVO ============== */
+  const liveStock = {};
+  produtosArr.forEach(p => { liveStock[p.id] = Number(p.estoque) || 0; });
+
+  const cardRefs = {}; // id -> {qtyEl, stockWrap, dot, btn}
+
+  const el = (tag, attrs={}, children=[]) => {
+    const n = document.createElement(tag);
+    for (const [k,v] of Object.entries(attrs)){
+      if (k==='class') n.className=v;
+      else if (k==='text') n.textContent=v;
+      else n.setAttribute(k,v);
+    }
+    for (const c of children) n.appendChild(c);
+    return n;
+  };
+  const go = (url) => { window.location.href = url; };
+
+  function flash(ref){
+    if (!ref) return;
+    ref.stockWrap.classList.add('changed');
+    ref.dot.classList.add('flash');
+    ref.qtyEl.classList.add('flash');
+    setTimeout(() => {
+      ref.stockWrap.classList.remove('changed');
+      ref.dot.classList.remove('flash');
+      ref.qtyEl.classList.remove('flash');
+    }, 700);
+  }
+
+  function updateStockUI(id, prevQty){
+    const ref = cardRefs[id];
+    if (!ref) return;
+    const qty = liveStock[id] || 0;
+    const inStock = qty > 0;
+
+    if (inStock){
+      ref.stockWrap.className = 'stock in';
+      ref.dot.className = 'dot green';
+      ref.qtyEl.textContent = `${qty} Unidades`;
+      ref.btn.classList.remove('oos');
+      ref.btn.textContent = 'Ver produto';
+    } else {
+      ref.stockWrap.className = 'stock out';
+      ref.dot.className = 'dot red';
+      ref.qtyEl.textContent = 'Sem estoque';
+      ref.btn.classList.add('oos');
+      ref.btn.textContent = 'Sem estoque';
+    }
+
+    if (typeof prevQty === 'number' && qty !== prevQty){
+      flash(ref);
+    }
+  }
+
+  /* ============== CARDS PRODUTO ============== */
+  function createCard(prod){
+    const img = el('img', { src:`img/${prod.img}`, alt: prod.nome, loading:'lazy', decoding:'async' });
+    const imgBox = el('div', { class:'card-img' }, [img]);
+    const title = el('h3', { class:'card-title', text: prod.nome });
+
+    const goProd = () => {
+      const qty = liveStock[prod.id] || 0;
+      if (qty > 0){ if (prod.link) go(prod.link); }
+      else { showModal('Produto indisponível', `Este produto está sem estoque e só retornará no próximo ano pelo valor integral de ${prod.precoRis}.`); }
+    };
+    imgBox.style.cursor = 'pointer';
+    imgBox.addEventListener('click', goProd, {passive:true});
+    title.style.cursor = 'pointer';
+    title.addEventListener('click', goProd, {passive:true});
+
+    const priceOld = el('span', { class:'price-old', text: prod.precoRis });
+    const priceNow = el('span', { class:'price-now', text: prod.preco });
+    const badge = el('span', { class:'badge', text: prod.desconto });
+    const priceRow = el('div', { class:'price-row' }, [priceOld, priceNow, badge]);
+
+    const dot = el('span', { class:'dot green' });
+    const qtyEl = el('span', { class:'stock-qty', text: `${liveStock[prod.id]} Unidades` });
+    const stockWrap = el('div', { class:'stock in' }, [dot, qtyEl]);
+
+    const btn = el('button', { class:'btn', type:'button', text:'Ver produto' });
+    btn.addEventListener('click', () => {
+      const qty = liveStock[prod.id] || 0;
+      if (qty > 0){ if (prod.link) go(prod.link); }
+      else { showModal('Produto indisponível', `Este produto está sem estoque e só retornará no próximo ano pelo valor integral de ${prod.precoRis}.`); }
+    }, {passive:true});
+
+    const body = el('div', { class:'card-body' }, [title, priceRow, stockWrap, btn]);
+    const card = el('article', { class:'product-card', role:'listitem', 'data-id': prod.id }, [imgBox, body]);
+
+    cardRefs[prod.id] = { qtyEl, stockWrap, dot, btn };
+    updateStockUI(prod.id);
+
+    return card;
+  }
+
+  /* ============== CARDS COLEÇÃO (só a foto) ============== */
+  function createCollectionCard(col){
+    const img = el('img', { src:`img/${col.img}`, alt: col.nome, loading:'lazy', decoding:'async' });
+    const imgBox = el('div', { class:'collection-img' }, [img]);
+    // Apenas imagem dentro do link
+    const link = el('a', { href: col.link, class:'collection-card', role:'listitem', 'aria-label': col.nome }, [imgBox]);
+    return link;
+  }
+
+  /* ============== MONTAGEM ============== */
+  function mountCarousel(trackId, ids){
+    const track = document.getElementById(trackId);
+    track.innerHTML = '';
+    for (const id of ids){ const p = byId[id]; if (p) track.appendChild(createCard(p)); }
+  }
+  function mountStacked(containerId, ids){
+    const box = document.getElementById(containerId);
+    box.innerHTML = '';
+    for (const id of ids){ const p = byId[id]; if (p) box.appendChild(createCard(p)); }
+  }
+  function mountCollections(trackId, arr){
+    const track = document.getElementById(trackId);
+    track.innerHTML = '';
+    for (const c of arr){ track.appendChild(createCollectionCard(c)); }
+  }
+
+  mountCollections('track-collections', colecoesArr);
+  mountCarousel('track-slider1', data.secoes.slider1);
+  mountStacked('stacked-list', data.secoes.stacked);
+  mountCarousel('track-slider2', data.secoes.slider2);
+
+  /* ============== CARROSSEL (setas + gestos) ============== */
+  document.querySelectorAll('.carousel').forEach(carousel => {
+    const track = carousel.querySelector('.track');
+    const prev = carousel.querySelector('.prev');
+    const next = carousel.querySelector('.next');
+
+    function getStep(){
+      const first = track.querySelector(':scope > *');
+      if (!first) return 300;
+      const styles = window.getComputedStyle(first);
+      const width = first.getBoundingClientRect().width
+        + parseFloat(styles.marginLeft) + parseFloat(styles.marginRight);
+      return Math.max(200, Math.min(420, width));
+    }
+    const atStart = () => track.scrollLeft <= 1;
+    const atEnd = () => Math.ceil(track.scrollLeft + track.clientWidth) >= track.scrollWidth - 1;
+
+    function updateNav(){
+      if (atStart()) prev.setAttribute('disabled',''); else prev.removeAttribute('disabled');
+      if (atEnd()) next.setAttribute('disabled',''); else next.removeAttribute('disabled');
+    }
+
+    prev.addEventListener('click', () => {
+      if (atStart()) return;
+      track.scrollBy({ left: -getStep(), behavior:'smooth' });
+      setTimeout(updateNav, 280);
+    }, {passive:true});
+
+    next.addEventListener('click', () => {
+      if (atEnd()) return;
+      track.scrollBy({ left: getStep(), behavior:'smooth' });
+      setTimeout(updateNav, 280);
+    }, {passive:true});
+
+    // Gesto: permite rolar vertical mesmo sobre o carrossel
+    let startY = 0, startX = 0;
+    track.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      startX = t.clientX; startY = t.clientY;
+    }, {passive:true});
+    track.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      const dx = Math.abs(t.clientX - startX);
+      const dy = Math.abs(t.clientY - startY);
+      if (dy > dx * 1.2) return; // gesto vertical -> deixa o body rolar
+      // gesto horizontal -> track rola normalmente (sem preventDefault)
+    }, {passive:true});
+
+    track.addEventListener('scroll', updateNav, {passive:true});
+    updateNav();
+  });
+
+  /* ============== FAQ (delegação + aria) ============== */
+  const faqList = document.getElementById('faq-list');
+  faqList.addEventListener('click', (e) => {
+    const btn = e.target.closest('.acc-item');
+    if (!btn) return;
+    const panelId = btn.getAttribute('aria-controls');
+    const panel = document.getElementById(panelId);
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+
+    faqList.querySelectorAll('.acc-item').forEach(b => b.setAttribute('aria-expanded','false'));
+    faqList.querySelectorAll('.acc-panel').forEach(p => p.hidden = true);
+    faqList.querySelectorAll('.acc-ico').forEach(i => i.textContent = '+');
+
+    if (!expanded){
+      btn.setAttribute('aria-expanded','true');
+      panel.hidden = false;
+      btn.querySelector('.acc-ico').textContent = '−';
+    }
+  });
+
+  /* ============== MODAL ============== */
+  function showModal(title, message){
+    const wrap = document.createElement('div'); wrap.className='modal-wrap';
+    const modal = document.createElement('div'); modal.className='modal';
+    const h3 = document.createElement('h3'); h3.textContent=title;
+    const p = document.createElement('p'); p.textContent=message;
+    const actions = document.createElement('div'); actions.className='modal-actions';
+    const ok = document.createElement('button'); ok.className='btn'; ok.type='button'; ok.textContent='OK';
+
+    function close(){
+      document.body.removeChild(wrap);
+      document.body.classList.remove('modal-open');
+      document.removeEventListener('keydown', esc);
+    }
+    function esc(e){ if(e.key==='Escape') close(); }
+
+    ok.addEventListener('click', close, {passive:true});
+    wrap.addEventListener('click', e => { if(e.target===wrap) close(); }, {passive:true});
+    document.addEventListener('keydown', esc);
+
+    actions.appendChild(ok);
+    modal.appendChild(h3); modal.appendChild(p); modal.appendChild(actions);
+    wrap.appendChild(modal);
+    document.body.appendChild(wrap);
+    document.body.classList.add('modal-open');
+  }
+
+  /* ============== ESTOQUE: cai 1 a cada 10s (aleatório) ============== */
+  setInterval(() => {
+    const candidates = Object.keys(liveStock).filter(id => liveStock[id] > 0);
+    if (!candidates.length) return;
+    const id = candidates[Math.floor(Math.random() * candidates.length)];
+    const prev = liveStock[id];
+    liveStock[id] = Math.max(0, prev - 1);
+    updateStockUI(id, prev);
+  }, 10000);
+});
