@@ -1,0 +1,205 @@
+:root{
+  --accent:#ffda22;
+  --buy:#57c22e;
+  --danger:#e11d48;
+  --stock:rgb(0,132,18);
+  --stock-bg:#d9fcd9;
+  --fire:#d90429;
+  --fire-bg:#ffe3e3;
+}
+
+/* Base */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#0b1220;background:#fff}
+img,video{max-width:100%;height:auto;}
+
+/* Header (agora com logo ao lado do menu) */
+.header{
+  position:sticky;top:0;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:var(--accent);border-bottom:1px solid rgba(0,0,0,.06)
+}
+.header__logo{height:44px;margin:0;display:block}
+.header__side{display:flex;align-items:center;gap:8px}
+.header__left{justify-content:flex-start}
+.header__right{justify-content:flex-end}
+.icon-btn{background:rgba(255,255,255,.7);border:0;border-radius:10px;padding:6px 10px;cursor:pointer;font-size:16px}
+.icon-btn:hover{background:#fff;transform:translateY(-1px);transition:.2s}
+.icon-btn img{width:24px;height:24px;display:block}
+
+/* Drawer (abre pela direita) / Modal rastreio / Toasts */
+.drawer{position:fixed;top:0;right:-300px;width:280px;height:100%;background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,.18);transition:right .25s ease;z-index:20;padding:16px}
+.drawer.open{right:0}
+.drawer__close{position:absolute;top:8px;right:10px;font-size:24px;background:transparent;border:0;cursor:pointer}
+.drawer__nav{margin-top:40px;display:flex;flex-direction:column;gap:10px}
+.drawer__link{color:#111;text-decoration:none;padding:10px 12px;border-radius:10px;border:1px solid #eee}
+.drawer__link:hover{background:#f9f9f9}
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:15}
+.backdrop.show{opacity:1;pointer-events:auto}
+
+.track-modal{position:fixed;inset:0;display:none;align-items:flex-start;justify-content:flex-end;background:rgba(0,0,0,.35);z-index:30;padding:70px 14px 14px}
+.track-modal.show{display:flex}
+.track-card{width:320px;background:#fff;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.22);padding:14px;border:1px solid #eee}
+.track-close{position:absolute;right:22px;top:76px;background:#fff;border:1px solid #eee;border-radius:999px;width:34px;height:34px;cursor:pointer}
+.track-card h3{margin:0 0 6px}
+#track-form{display:flex;gap:8px}
+#track-input{flex:1;padding:10px;border:1px solid #e5e7eb;border-radius:10px}
+.track-btn{padding:10px 12px;border-radius:10px;border:0;background:#111827;color:#fff;cursor:pointer}
+.track-result{margin-top:10px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:10px;padding:10px}
+
+.toasts{position:fixed;left:12px;bottom:120px;display:flex;flex-direction:column;gap:10px;z-index:25}
+.toast{background:var(--accent);color:#0b4a0b;padding:10px 12px;border-radius:12px;font-size:14px;opacity:.97;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+
+/* Top info */
+.container{max-width:1180px;margin:0 auto;padding:14px}
+.top-info{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;font-size:14px;font-weight:700}
+.top-info__left{color:#111;background:#fff3a3;border:1px solid #f0d64a;padding:6px 10px;border-radius:999px}
+.top-info__right{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.stars{color:var(--accent)}
+
+/* HOT pill */
+.hot-pill{display:inline-flex;align-items:center;gap:8px;background:var(--fire-bg);color:var(--fire);border:1px solid rgba(217,4,41,.25);border-radius:999px;padding:6px 12px;font-weight:900;animation:firePulse 1.2s infinite}
+.hot-pill--before-discount{margin:6px 0 4px}
+.hot-flame{display:inline-block;filter:drop-shadow(0 0 4px rgba(217,4,41,.6));animation:flame 1s ease-in-out infinite}
+@keyframes flame{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-1px) scale(1.08)}100%{transform:translateY(0) scale(1)}}
+@keyframes firePulse{0%{box-shadow:0 0 0 0 rgba(217,4,41,.35)}70%{box-shadow:0 0 0 10px rgba(217,4,41,0)}100%{box-shadow:0 0 0 0 rgba(217,4,41,0)}}
+
+/* Produto */
+.product{display:grid;grid-template-columns:1.15fr 1fr;gap:24px;align-items:start}
+@media (max-width:900px){.product{grid-template-columns:1fr}}
+
+/* Galeria */
+.gallery{position:relative;display:grid;gap:12px;touch-action:pan-y;}
+#main-img{width:100%;border-radius:16px;border:1px solid #e5e7eb;background:#fff;cursor:zoom-in}
+.thumbs{display:grid;grid-auto-flow:column;gap:10px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.thumbs::-webkit-scrollbar{display:none}
+.thumbs img{width:130px;height:90px;object-fit:cover;border:2px solid transparent;border-radius:10px;cursor:pointer;flex:0 0 auto;transition:transform .15s,border-color .15s;scroll-snap-align:start}
+.thumbs img:hover{transform:translateY(-2px);border-color:var(--accent)}
+.nav-arrow{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:999px;border:0;cursor:pointer;background:rgba(255,255,255,.9);box-shadow:0 6px 18px rgba(0,0,0,.12);font-size:22px;font-weight:900;line-height:42px;text-align:center;touch-action:manipulation}
+.prev{left:10px}.next{right:10px}
+
+/* Lightbox */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:30;touch-action:pan-y;}
+.lightbox.show{display:flex}
+.lb-close,.lb-arrow{position:absolute;background:rgba(255,255,255,.9);border:0;border-radius:999px;width:44px;height:44px;cursor:pointer;font-size:22px}
+.lb-close{top:16px;right:16px}
+.lb-prev{left:18px}.lb-next{right:18px}
+#lb-img{max-width:92vw;max-height:88vh;border-radius:10px;border:1px solid #333}
+
+/* Desconto / Preço / Viewers / Estoque */
+.discount-badge{display:inline-block;background:var(--accent);color:#000;font-weight:900;padding:6px 12px;border-radius:999px;border:1px solid #f0d64a;box-shadow:0 4px 12px rgba(0,0,0,.06);margin:6px 0 4px}
+.price-wrap{display:flex;align-items:baseline;gap:10px}
+.old-price{color:var(--danger);text-decoration:line-through;font-weight:800}
+.price{font-size:34px;font-weight:900;color:#111}
+.viewer-bar{margin:6px 0 10px;color:#333;font-weight:700}
+
+.stock-pill{display:inline-flex;align-items:center;gap:8px;background:var(--stock-bg);color:var(--stock);border-radius:999px;padding:6px 12px;font-weight:800;border:1px solid rgba(0,132,18,.18);animation:stockPulse 1.4s ease-in-out infinite}
+.stock-dot{width:14px;height:14px;border-radius:50%;background:var(--stock);box-shadow:0 0 0 0 rgba(0,132,18,.6);animation:dotBlink 1.2s ease-in-out infinite}
+@keyframes stockPulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+@keyframes dotBlink{0%{box-shadow:0 0 0 0 rgba(0,132,18,.6)}70%{box-shadow:0 0 0 8px rgba(0,132,18,0)}100%{box-shadow:0 0 0 0 rgba(0,132,18,0)}}
+
+/* Comprar */
+.buy{margin:12px 0 16px}
+.buy-now{display:block;text-align:center;width:100%;padding:16px 22px;border-radius:14px;border:2px solid var(--buy);background:var(--buy);color:#fff;font-weight:900;letter-spacing:.5px;text-transform:uppercase;font-size:18px;cursor:pointer;animation:pulse 1.3s ease-in-out infinite;box-shadow:0 10px 28px rgba(87,194,46,.28);text-decoration:none}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.025)}100%{transform:scale(1)}}
+
+/* Card de frete */
+.shipping-card{border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff;margin:10px 0 6px}
+.ship-title{color:#0b7a2b;font-weight:900;display:flex;align-items:center;gap:6px}
+.ship-ico{font-size:18px}
+.ship-eta{margin-top:8px;color:#333}
+.ship-benefits{margin:12px 0 0;padding-left:0;list-style:none;color:#555}
+.ship-benefits li{margin:8px 0}
+
+/* Sections / Specs / Fotos / Sobre a Elite / Garantia / Reviews */
+.section{margin-top:22px}
+.section h3{margin:0 0 10px;font-size:18px;color:var(--accent)}
+.section p{line-height:1.5;color:#222}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}
+.badge{background:#fff7bf;border:1px solid var(--accent);color:#111;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
+.specs div{background:#fff;border:1px solid #f1e27a;border-left:4px solid var(--accent);border-radius:10px;padding:10px;font-size:14px}
+
+/* ===== Fotos do produto: 2x2 SEMPRE (inclusive no mobile) ===== */
+.photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.photo-grid img{width:100%;height:200px;object-fit:cover;border-radius:12px;border:1px solid #e5e7eb;cursor:zoom-in}
+
+/* About / Garantia */
+.about-row{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center;margin-top:14px}
+.about-img{width:100%;border-radius:10px;border:1px solid #e5e7eb}
+.about-text h4{margin:0 0 6px}
+.guarantee-block{margin-top:12px}
+#guarantee-preview{display:block;width:100%;max-height:300px;object-fit:contain;margin-top:8px;border:1px solid #e5e7eb;border-radius:10px}
+.guarantee-text{margin-top:8px}
+
+/* Avaliação */
+.review-form{border:1px solid #eee;border-radius:12px;padding:14px;background:#fff}
+.review-form h3{margin:0 0 10px;color:#111}
+.form-row{display:grid;grid-template-columns:1fr 180px;gap:10px}
+.review-form label{display:grid;gap:6px;font-size:14px;color:#333}
+.review-form input,.review-form textarea,.review-form select{padding:10px;border:1px solid #e5e7eb;border-radius:10px;font-size:14px}
+.file-field input[type="file"]{padding:8px;border:1px solid #e5e7eb;border-radius:10px;font-size:14px;background:#fff}
+.btn-submit{margin-top:10px;background:#111827;color:#fff;border:1px solid #111827;border-radius:10px;padding:10px 14px;cursor:pointer}
+
+/* Rodapé (igual ao site) */
+.footer{background:#FFDA22;border-top:2px solid #e2b900;margin-top:8px;padding:18px 16px;color:#111;text-align:left}
+.footer a{color:#111;text-decoration:none}
+.footer a:hover{text-decoration:underline}
+.footer-inner{max-width:1100px;margin:0 auto}
+.footer-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:32px;align-items:start}
+@media (max-width:767.98px){.footer-grid{grid-template-columns:1fr;gap:20px}}
+.footer-col h3{margin:6px 0 8px;font-size:20px;font-weight:800}
+.footer-contact .footer-logo{height:40px;width:auto;display:block;margin-bottom:10px}
+.footer-col ul{margin:0;padding-left:20px;list-style:disc}
+.footer-col p,.footer-col li{font-size:16px}
+.footer-copy{text-align:center;font-weight:800;margin-top:8px}
+
+/* FAQ */
+.sec-title{text-align:center;font-weight:800}
+.accordion{max-width:1100px;margin:0 auto;padding:0 16px 18px;text-align:center}
+.acc-item{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;margin-bottom:10px;font-weight:800}
+.acc-q{flex:1;text-align:center}
+.acc-ico{font-size:24px;line-height:1}
+.acc-panel{padding:10px 14px 16px;border:1px solid #e5e7eb;border-top:0;border-radius:0 0 12px 12px;margin:-10px 0 10px;background:#fff}
+.acc-panel[hidden]{display:none}
+
+/* Responsividade extra */
+@media (max-width:680px){
+  .container{padding:12px}
+  .header{padding:8px 10px}
+  .header__logo{height:44px}
+  .icon-btn{padding:6px 8px}
+  .icon-btn img{width:22px;height:22px}
+  .nav-arrow{width:36px;height:36px;line-height:36px;font-size:20px}
+  .thumbs img{width:110px;height:78px}
+
+  .discount-badge{font-size:13px;padding:6px 10px}
+  .price{font-size:clamp(22px,6vw,32px)}
+  .old-price{font-size:clamp(13px,3.8vw,16px)}
+  .viewer-bar{font-size:13px}
+  .stock-pill{font-size:13px}
+
+  .buy-now{font-size:clamp(16px,4.5vw,18px);padding:14px 18px}
+
+  .specs{grid-template-columns:1fr}
+
+  /* Fotos 2x2 também no mobile */
+  .photo-grid{grid-template-columns:repeat(2,1fr)}
+  .photo-grid img{height:170px}
+
+  .about-row{grid-template-columns:1fr;gap:10px}
+  .about-img{max-width:220px;justify-self:center}
+  .section h3{font-size:clamp(16px,4.5vw,18px)}
+
+  .form-row{grid-template-columns:1fr}
+}
+@media (max-width:380px){
+  .header__logo{height:40px}
+  .icon-btn img{width:20px;height:20px}
+  .thumbs img{width:96px;height:70px}
+  .nav-arrow{width:32px;height:32px;line-height:32px;font-size:18px}
+  .price{font-size:clamp(20px,7vw,28px)}
+  .buy-now{padding:12px 16px}
+  .photo-grid img{height:150px}
+}

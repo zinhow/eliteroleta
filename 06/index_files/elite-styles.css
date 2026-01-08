@@ -1,0 +1,18 @@
+.elite-reviews{ margin-top:28px; }
+.elite-title{ font-size:20px; font-weight:800; text-align:center; margin-bottom:16px; color:var(--accent, #ffda22); }
+
+.elite-container{
+  display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+  gap:14px;
+}
+
+.elite-card{
+  background:#fff; border:1px solid var(--accent, #ffda22); border-radius:12px;
+  padding:14px; display:flex; flex-direction:column; gap:8px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+.elite-card img{ width:100%; border-radius:8px; }
+
+.elite-name{ font-weight:700; font-size:15px; color:#111; }
+.elite-stars{ color:var(--accent, #ffda22); font-size:14px; }
+.elite-comment{ font-size:13px; line-height:1.4; color: #333; }
